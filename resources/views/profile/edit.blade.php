@@ -1,5 +1,30 @@
 <x-app-layout>
     <x-slot name="header">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-6">
+    @if($weather)
+        <div class="p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 shadow-sm rounded-lg">
+            <h3 class="font-bold">Estado Climático Actual</h3>
+            <p>Temperatura: {{ $weather['main']['temp'] }}°C | {{ ucfirst($weather['weather'][0]['description']) }}</p>
+
+            {{-- AVISO RESTRICTIVO: Si llueve (Rain), nieva (Snow) o hay tormenta (Thunderstorm) --}}
+            @php 
+                $estado = $weather['weather'][0]['main']; 
+                $condicionesAdversas = ['Rain', 'Snow', 'Thunderstorm', 'Drizzle'];
+            @endphp
+
+            @if(in_array($estado, $condicionesAdversas))
+                <div class="mt-4 p-4 bg-red-600 text-white font-bold rounded animate-pulse">
+                    ⚠️ AVISO RESTRICTIVO: Las condiciones climáticas son adversas. Se recomienda limitar las actividades externas.
+                </div>
+            @endif
+        </div>
+    @else
+        <div class="p-4 bg-yellow-100 text-yellow-700 rounded-lg">
+            Guarda tu ubicación en el mapa para ver el clima actual.
+        </div>
+    @endif
+</div>
+
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Profile') }}
         </h2>
@@ -89,5 +114,5 @@
             });
         }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap" async defer></script>
 </x-app-layout>

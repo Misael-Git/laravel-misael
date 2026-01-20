@@ -19,9 +19,12 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+    'name',
+    'email',
+    'password',
+    'lat',
+    'lng',
+    'address',
     ];
 
     /**
@@ -46,4 +49,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function tasks()
+{
+    return $this->hasMany(Task::class);
+}
 }
