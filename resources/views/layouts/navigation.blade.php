@@ -19,6 +19,15 @@
                         {{ __('Tareas') }}
                     </x-nav-link>
                 </div>
+
+                <!-- Global Weather Indicator -->
+                @if(isset($globalWeather))
+                    <div class="hidden sm:flex items-center ms-10 text-sm font-medium text-gray-500">
+                        <span class="mr-2">🌡️ {{ $globalWeather['main']['temp'] }}°C</span>
+                        <span class="text-gray-400">|</span>
+                        <span class="ml-2">{{ ucfirst($globalWeather['weather'][0]['description']) }}</span>
+                    </div>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->
