@@ -43,39 +43,35 @@
                 <div class="max-w-xl">
                     <header>
                         <h2 class="text-lg font-bold text-white uppercase tracking-tight">Ubicación Geográfica</h2>
-                        <p class="mt-1 text-sm text-cyan-400/60">Busca tu dirección o introduce las coordenadas manualmente.</p>
+                        <p class="mt-1 text-sm text-cyan-400/60 font-bold uppercase tracking-widest">Haz click en el mapa para establecer tu ubicación predeterminada.</p>
                     </header>
 
-                    <div class="mt-6 space-y-4">
-                        <div>
-                            <x-input-label for="address_search" value="Buscar Dirección (Geoapify)" />
-                            <div class="flex gap-2">
-                                <x-text-input id="address_search" type="text" class="flex-grow" placeholder="Ej: Calle Gran Vía, Madrid" />
-                                <button type="button" onclick="searchAddress()" class="neon-button px-4 py-2 text-xs">Buscar</button>
-                            </div>
-                        </div>
+                    <div class="mt-6 space-y-6">
+                        <div id="profile-map" class="h-[300px] w-full rounded-2xl border border-white/10 z-0 shadow-2xl"></div>
 
                         <form method="post" action="{{ route('profile.update') }}" class="space-y-6">
                             @csrf
                             @method('patch')
+                            <input type="hidden" name="name" value="{{ $user->name }}">
+                            <input type="hidden" name="email" value="{{ $user->email }}">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="lat" value="Latitud" />
-                                    <x-text-input id="lat" name="lat" type="text" class="mt-1 block w-full" :value="old('lat', $user->lat)" placeholder="Ej: 40.4168" />
+                                    <x-text-input id="lat" name="lat" type="text" class="mt-1 block w-full" :value="old('lat', $user->lat)" readonly />
                                     <x-input-error class="mt-2" :messages="$errors->get('lat')" />
                                 </div>
 
                                 <div>
                                     <x-input-label for="lng" value="Longitud" />
-                                    <x-text-input id="lng" name="lng" type="text" class="mt-1 block w-full" :value="old('lng', $user->lng)" placeholder="Ej: -3.7038" />
+                                    <x-text-input id="lng" name="lng" type="text" class="mt-1 block w-full" :value="old('lng', $user->lng)" readonly />
                                     <x-input-error class="mt-2" :messages="$errors->get('lng')" />
                                 </div>
                             </div>
                             
                             <div>
-                                <x-input-label for="address" value="Dirección Postal Confirmada" />
-                                <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" placeholder="Dirección autocompletada..." />
+                                <x-input-label for="address" value="Dirección Postal o Referencia" />
+                                <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" placeholder="Ej: Mi Casa, Sevilla" />
                                 <x-input-error class="mt-2" :messages="$errors->get('address')" />
                             </div>
 
@@ -86,27 +82,30 @@
                     </div>
 
                     <script>
-                        function searchAddress() {
-                            const query = document.getElementById('address_search').value;
-                            if (!query) return;
+                        document.addEventListener('DOMContentLoaded', function() {
+                            let initLat = {{ $user->lat ?? 40.4168 }};
+                            let initLng = {{ $user->lng ?? -3.7038 }};
+                            const map = L.map('profile-map').setView([initLat, initLng], {{ $user->lat ? 13 : 5 }});
 
-                            const apiKey = "07dba4724dc64d5480388edfecb63e40";
-                            const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(query)}&apiKey=${apiKey}`;
+                            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                                attribution: '&copy; CARTO',
+                                subdomains: 'abcd',
+                                maxZoom: 20
+                            }).addTo(map);
 
-                            fetch(url)
-                                .then(response => response.json())
-                                .then(result => {
-                                    if (result.features && result.features.length > 0) {
-                                        const feature = result.features[0];
-                                        document.getElementById('lat').value = feature.properties.lat;
-                                        document.getElementById('lng').value = feature.properties.lon;
-                                        document.getElementById('address').value = feature.properties.formatted;
-                                    } else {
-                                        alert("No se encontró la dirección.");
-                                    }
-                                })
-                                .catch(error => console.log('error', error));
-                        }
+                            let marker = null;
+                            if ({{ $user->lat ? 'true' : 'false' }}) {
+                                marker = L.marker([initLat, initLng]).addTo(map);
+                            }
+
+                            map.on('click', function(e) {
+                                if (marker) marker.setLatLng(e.latlng);
+                                else marker = L.marker(e.latlng).addTo(map);
+
+                                document.getElementById('lat').value = e.latlng.lat;
+                                document.getElementById('lng').value = e.latlng.lng;
+                            });
+                        });
                     </script>
                 </div>
             </div>

@@ -29,10 +29,9 @@
                         </div>
 
                         <!-- Scheduled Date & Forecast -->
-                        <div class="mb-6">
-                            <x-input-label for="scheduled_at" :value="__('¿Cuándo? (Opcional)')" />
-                            <x-text-input id="scheduled_at" class="block mt-1 w-full" type="datetime-local" name="scheduled_at" :value="old('scheduled_at', $task->scheduled_at ? $task->scheduled_at->format('Y-m-d\TH:i') : '')" />
-                            <p class="mt-2 text-xs text-white/40 uppercase tracking-widest">Cambia la fecha para actualizar el clima previsto.</p>
+                        <div class="mb-8">
+                            <x-custom-datetime-picker name="scheduled_at" :value="old('scheduled_at', $task->scheduled_at ? $task->scheduled_at->format('Y-m-d H:i') : null)" />
+                            <p class="mt-4 text-[10px] text-white/30 uppercase tracking-[0.2em]">Elige una fecha para visualizar el clima previsto en la línea de tiempo.</p>
                             <x-input-error :messages="$errors->get('scheduled_at')" class="mt-2" />
                         </div>
 
