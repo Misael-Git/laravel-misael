@@ -7,8 +7,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass-card">
+                <div class="p-6">
                     
                     <form action="{{ route('tasks.update', $task) }}" method="POST">
                         @csrf
@@ -24,25 +24,75 @@
                         <!-- Description -->
                         <div class="mb-4">
                             <x-input-label for="description" :value="__('Descripción')" />
-                            <textarea id="description" name="description" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="4">{{ old('description', $task->description) }}</textarea>
+                            <textarea id="description" name="description" class="block mt-1 w-full bg-white/5 border-white/10 focus:border-cyan-500 focus:ring-cyan-500 rounded-xl shadow-sm text-white placeholder-white/20 backdrop-blur-md" rows="4">{{ old('description', $task->description) }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                        </div>
+
+                        <!-- Scheduled Date & Forecast -->
+                        <div class="mb-6">
+                            <x-input-label for="scheduled_at" :value="__('¿Cuándo? (Opcional)')" />
+                            <x-text-input id="scheduled_at" class="block mt-1 w-full" type="datetime-local" name="scheduled_at" :value="old('scheduled_at', $task->scheduled_at ? $task->scheduled_at->format('Y-m-d\TH:i') : '')" />
+                            <p class="mt-2 text-xs text-white/40 uppercase tracking-widest">Cambia la fecha para actualizar el clima previsto.</p>
+                            <x-input-error :messages="$errors->get('scheduled_at')" class="mt-2" />
+                        </div>
+
+                        <!-- Map Selection -->
+                        <div class="mb-6">
+                            <x-input-label :value="__('Ubicación (Opcional - Haz click en el mapa)')" />
+                            <div id="map" class="h-[300px] w-full rounded-2xl border border-white/10 mt-2 z-0 shadow-2xl"></div>
+                            
+                            <input type="hidden" name="lat" id="lat" value="{{ old('lat', $task->lat) }}">
+                            <input type="hidden" name="lng" id="lng" value="{{ old('lng', $task->lng) }}">
                         </div>
 
                         <!-- Is Completed -->
                         <div class="block mt-4 mb-4">
-                            <label for="is_completed" class="inline-flex items-center">
-                                <input id="is_completed" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="is_completed" value="1" {{ $task->is_completed ? 'checked' : '' }}>
-                                <span class="ms-2 text-sm text-gray-600">{{ __('Marcar como completada') }}</span>
+                            <label for="is_completed" class="inline-flex items-center group cursor-pointer">
+                                <input id="is_completed" type="checkbox" class="rounded border-white/10 bg-white/5 text-cyan-500 shadow-sm focus:ring-cyan-500 transition-colors" name="is_completed" value="1" {{ $task->is_completed ? 'checked' : '' }}>
+                                <span class="ms-2 text-sm text-gray-400 group-hover:text-cyan-300 transition-colors">{{ __('Marcar como completada') }}</span>
                             </label>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('tasks.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">Cancelar</a>
+                            <a href="{{ route('tasks.index') }}" class="mr-4 text-gray-400 hover:text-cyan-400 transition-colors uppercase text-xs font-bold tracking-widest">Cancelar</a>
                             <x-primary-button>
                                 {{ __('Actualizar Tarea') }}
                             </x-primary-button>
                         </div>
                     </form>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            let initialLat = {{ old('lat', $task->lat ?? auth()->user()->lat ?? 40.4168) }};
+                            let initialLng = {{ old('lng', $task->lng ?? auth()->user()->lng ?? -3.7038) }};
+
+                            const map = L.map('map').setView([initialLat, initialLng], 13);
+
+                            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                                subdomains: 'abcd',
+                                maxZoom: 20
+                            }).addTo(map);
+
+                            let marker = null;
+
+                            // Place marker if coordinates exist
+                            if (initialLat && initialLng) {
+                                marker = L.marker([initialLat, initialLng]).addTo(map);
+                            }
+
+                            map.on('click', function(e) {
+                                if (marker) {
+                                    marker.setLatLng(e.latlng);
+                                } else {
+                                    marker = L.marker(e.latlng).addTo(map);
+                                }
+
+                                document.getElementById('lat').value = e.latlng.lat;
+                                document.getElementById('lng').value = e.latlng.lng;
+                            });
+                        });
+                    </script>
 
                 </div>
             </div>

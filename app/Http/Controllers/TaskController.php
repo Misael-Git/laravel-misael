@@ -26,7 +26,16 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
+            'scheduled_at' => 'nullable|date',
         ]);
+
+        // Default to user coordinates if not provided
+        if (empty($validated['lat']) || empty($validated['lng'])) {
+            $validated['lat'] = auth()->user()->lat;
+            $validated['lng'] = auth()->user()->lng;
+        }
 
         $request->user()->tasks()->create($validated);
 
@@ -59,6 +68,9 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_completed' => 'boolean',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
+            'scheduled_at' => 'nullable|date',
         ]);
 
         $task->update($validated);
