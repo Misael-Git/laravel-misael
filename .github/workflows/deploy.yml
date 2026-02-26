@@ -11,7 +11,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/proyectos/mi-laravel || git clone https://github.com/tu-user/tu-repo.git ~/proyectos/mi-laravel
+            cd ~/proyectos/mi-laravel || git clone https://github.com/Misael-Git/laravel-misael.git ~/proyectos/mi-laravel
             cd ~/proyectos/mi-laravel
             git pull origin main
             docker compose up -d --build

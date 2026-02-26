@@ -10,7 +10,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: root_password_seguro
+      MYSQL_ROOT_PASSWORD: toor
     volumes:
       - ./mysql_data:/var/lib/mysql
     networks:
