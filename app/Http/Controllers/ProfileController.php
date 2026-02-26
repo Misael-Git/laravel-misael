@@ -16,32 +16,32 @@ class ProfileController extends Controller
      * Display the user's profile form.
      */
 
-public function edit(Request $request): View
-{
-    $user = $request->user();
-    $weather = null;
+    public function edit(Request $request): View
+    {
+        $user = $request->user();
+        $weather = null;
 
-    // Solo pedimos el clima si el usuario tiene coordenadas guardadas
-    // Eliminamos la llamada que tenías fuera del IF
-    if ($user->lat && $user->lng) {
-        $response = Http::get("https://api.openweathermap.org/data/2.5/weather", [
-            'lat' => $user->lat,
-            'lon' => $user->lng,
-            'appid' => env('OPENWEATHER_API_KEY'),
-            'units' => 'metric',
-            'lang' => 'es'
-        ]);
+        // Solo pedimos el clima si el usuario tiene coordenadas guardadas
+        // Eliminamos la llamada que tenías fuera del IF
+        if ($user->lat && $user->lng) {
+            $response = Http::withoutVerifying()->get("https://api.openweathermap.org/data/2.5/weather", [
+                'lat' => $user->lat,
+                'lon' => $user->lng,
+                'appid' => env('OPENWEATHER_API_KEY'),
+                'units' => 'metric',
+                'lang' => 'es'
+            ]);
 
-        if ($response->successful()) {
-            $weather = $response->json();
+            if ($response->successful()) {
+                $weather = $response->json();
+            }
         }
-    }
 
-    return view('profile.edit', [
-        'user' => $user,
-        'weather' => $weather,
-    ]);
-}
+        return view('profile.edit', [
+            'user' => $user,
+            'weather' => $weather,
+        ]);
+    }
 
     /**
      * Update the user's profile information.

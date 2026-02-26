@@ -38,7 +38,7 @@ class Task extends Model
 
         return cache()->remember("task_forecast_{$this->id}", 3600, function () {
             try {
-                $response = \Illuminate\Support\Facades\Http::get("https://api.openweathermap.org/data/2.5/forecast", [
+                $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get("https://api.openweathermap.org/data/2.5/forecast", [
                     'lat' => $this->lat,
                     'lon' => $this->lng,
                     'appid' => env('OPENWEATHER_API_KEY'),
@@ -49,7 +49,7 @@ class Task extends Model
                 if ($response->successful()) {
                     $data = $response->json();
                     $scheduledTime = $this->scheduled_at->timestamp;
-                    
+
                     // Buscar la entrada más cercana en el tiempo
                     $closest = null;
                     $minDiff = PHP_INT_MAX;

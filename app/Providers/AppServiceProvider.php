@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
                 $user = auth()->user();
                 $weather = cache()->remember("weather_{$user->id}", 600, function () use ($user) {
                     if ($user->lat && $user->lng) {
-                        $response = \Illuminate\Support\Facades\Http::get("https://api.openweathermap.org/data/2.5/weather", [
+                        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get("https://api.openweathermap.org/data/2.5/weather", [
                             'lat' => $user->lat,
                             'lon' => $user->lng,
                             'appid' => env('OPENWEATHER_API_KEY'),

@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/var/www
+    networks:
+      - red-publica
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: root_password_seguro
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - red-publica
+
+networks:
+  red-publica:
+    external: true
