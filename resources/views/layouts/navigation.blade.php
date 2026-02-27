@@ -5,51 +5,86 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center gap-3">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 group transition-all duration-300">
-                        <x-application-logo class="block h-10 w-auto fill-current text-cyan-400 group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_rgba(0,242,255,0.6)] transition-all" />
-                        <span class="text-xl font-black tracking-tighter text-white group-hover:neon-text transition-all uppercase">Lists</span>
+                    <a href="{{ route('dashboard') }}"
+                        class="flex items-center gap-2 group transition-all duration-300">
+                        <x-application-logo
+                            class="block h-10 w-auto fill-current text-cyan-400 group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_rgba(0,242,255,0.6)] transition-all" />
+                        <span
+                            class="text-xl font-black tracking-tighter text-white group-hover:neon-text transition-all uppercase">Lists</span>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-white hover:text-cyan-400">
-                        {{ __('Dashboard') }}
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')"
+                        class="text-white hover:text-cyan-400">
+                        {{ __('De un vistazo') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')" class="text-white hover:text-cyan-400">
+                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')"
+                        class="text-white hover:text-cyan-400">
                         {{ __('Tareas') }}
                     </x-nav-link>
                 </div>
 
                 <!-- Global Weather Indicator -->
                 @if(isset($globalWeather))
-                    <div class="hidden sm:flex items-center ms-10 text-sm font-medium glass-panel px-4 py-1 my-3 bg-cyan-500/10 border-cyan-500/20 text-cyan-300">
+                    <div
+                        class="hidden sm:flex items-center ms-10 text-sm font-medium glass-panel px-4 py-1 my-3 bg-cyan-500/10 border-cyan-500/20 text-cyan-300">
                         <span class="mr-2">🌡️ {{ $globalWeather['main']['temp'] }}°C</span>
                         <span class="text-white/20">|</span>
-                        <span class="ml-2 uppercase tracking-widest text-[10px]">{{ ucfirst($globalWeather['weather'][0]['description']) }}</span>
+                        <span
+                            class="ml-2 uppercase tracking-widest text-[10px]">{{ ucfirst($globalWeather['weather'][0]['description']) }}</span>
                     </div>
                 @endif
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
+            <!-- Settings Dropdown & Stats -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-6">
+                <!-- Task Stats (Decorative) -->
+                <div class="flex items-center gap-4 px-4 py-1.5 glass-panel bg-white/5 border-white/10 rounded-xl">
+                    <div class="flex flex-col items-center">
+                        <span class="text-[8px] text-white/30 font-black uppercase tracking-tighter">Total</span>
+                        <span
+                            class="text-xs font-bold text-cyan-400 leading-none">{{ Auth::user()->tasks()->count() }}</span>
+                    </div>
+                    <div class="w-px h-6 bg-white/10"></div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-[8px] text-white/30 font-black uppercase tracking-tighter">Pendientes</span>
+                        <span
+                            class="text-xs font-bold text-cyan-400 leading-none">{{ Auth::user()->tasks()->where('is_completed', false)->count() }}</span>
+                    </div>
+                </div>
+
+                <x-dropdown align="right" width="48" contentClasses="bg-transparent">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-white/10 text-sm leading-4 font-medium rounded-xl text-cyan-100 bg-white/5 hover:bg-white/10 focus:outline-none transition ease-in-out duration-150">
+                        <button
+                            class="inline-flex items-center px-4 py-2 border border-white/10 text-sm leading-4 font-bold rounded-xl text-cyan-100 bg-white/5 hover:bg-white/10 hover:border-cyan-500/30 transition-all duration-300">
                             <div>{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </div>
                         </button>
                     </x-slot>
 
                     <x-slot name="content">
-                        <div class="bg-[#0a0a12] border border-white/10 rounded-xl overflow-hidden">
-                            <x-dropdown-link :href="route('profile.edit')" class="text-white hover:bg-white/10">
-                                {{ __('Profile') }}
+                        <div
+                            class="bg-[#0a0a12] border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl">
+                            <x-dropdown-link :href="route('profile.edit')"
+                                class="text-white hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors py-3 border-b border-white/5 no-underline">
+                                <div class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    {{ __('Profile') }}
+                                </div>
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -57,10 +92,17 @@
                                 @csrf
 
                                 <x-dropdown-link :href="route('logout')"
-                                        class="text-red-400 hover:bg-red-500/10"
-                                        onclick="event.preventDefault();
+                                    class="text-red-400 hover:bg-red-500/10 transition-colors py-3 no-underline"
+                                    onclick="event.preventDefault();
                                                     this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    <div class="flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        {{ __('Log Out') }}
+                                    </div>
                                 </x-dropdown-link>
                             </form>
                         </div>
@@ -70,10 +112,14 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-cyan-400 hover:text-white hover:bg-white/10 focus:outline-none transition duration-150 ease-in-out">
+                <button @click="open = ! open"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-cyan-400 hover:text-white hover:bg-white/10 focus:outline-none transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -83,10 +129,12 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-[#030308]/95 backdrop-blur-xl">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-white">
-                {{ __('Dashboard') }}
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')"
+                class="text-white">
+                {{ __('De un vistazo') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')" class="text-white">
+            <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')"
+                class="text-white">
                 {{ __('Tareas') }}
             </x-responsive-nav-link>
         </div>
@@ -107,9 +155,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                            class="text-red-400"
-                            onclick="event.preventDefault();
+                    <x-responsive-nav-link :href="route('logout')" class="text-red-400" onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

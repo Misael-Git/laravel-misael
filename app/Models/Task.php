@@ -6,12 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    protected $fillable = ['user_id', 'title', 'description', 'is_completed', 'lat', 'lng', 'scheduled_at'];
+    protected $fillable = ['user_id', 'title', 'description', 'notes', 'is_completed', 'auto_complete', 'lat', 'lng', 'scheduled_at'];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'is_completed' => 'boolean',
     ];
+
+    /**
+     * El "booted" method del modelo.
+     */
+    protected static function booted()
+    {
+        static::saving(function ($task) {
+            if ($task->auto_complete && $task->scheduled_at && $task->scheduled_at->isPast()) {
+                $task->is_completed = true;
+            }
+        });
+    }
 
     /**
      * Relación inversa: Una tarea pertenece a un usuario
@@ -26,7 +38,10 @@ class Task extends Model
      */
     public function getForecast()
     {
-        if (!$this->lat || !$this->lng || !$this->scheduled_at) {
+        $lat = $this->lat ?: $this->user->lat;
+        $lng = $this->lng ?: $this->user->lng;
+
+        if (!$lat || !$lng || !$this->scheduled_at) {
             return null;
         }
 
@@ -69,5 +84,21 @@ class Task extends Model
             }
             return null;
         });
+    }
+
+    /**
+     * Determina si el clima previsto para la tarea es adverso.
+     */
+    public function isWeatherAdverse()
+    {
+        $forecast = $this->getForecast();
+        if (!$forecast) {
+            return false;
+        }
+
+        $main = $forecast['weather'][0]['main'];
+        $adverseConditions = ['Rain', 'Snow', 'Thunderstorm', 'Drizzle'];
+
+        return in_array($main, $adverseConditions);
     }
 }

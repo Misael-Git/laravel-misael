@@ -10,9 +10,15 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = auth()->user()->tasks()->latest()->paginate(5);
+        $query = auth()->user()->tasks();
+
+        if ($request->has('date')) {
+            $query->whereDate('scheduled_at', $request->date);
+        }
+
+        $tasks = $query->orderBy('scheduled_at', 'asc')->paginate(10);
         return view('tasks.index', compact('tasks'));
     }
 
@@ -26,6 +32,8 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'auto_complete' => 'boolean',
             'lat' => 'nullable|numeric',
             'lng' => 'nullable|numeric',
             'scheduled_at' => 'nullable|date',
@@ -67,7 +75,9 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'notes' => 'nullable|string',
             'is_completed' => 'boolean',
+            'auto_complete' => 'boolean',
             'lat' => 'nullable|numeric',
             'lng' => 'nullable|numeric',
             'scheduled_at' => 'nullable|date',
@@ -83,9 +93,25 @@ class TaskController extends Controller
         if ($task->user_id !== auth()->id()) {
             abort(403);
         }
-        
+
         $task->delete();
 
         return redirect()->route('tasks.index')->with('success', 'Tarea eliminada.');
+    }
+
+    /**
+     * Alternar el estado de completado de una tarea.
+     */
+    public function toggle(Task $task)
+    {
+        if ($task->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $task->update([
+            'is_completed' => !$task->is_completed
+        ]);
+
+        return back()->with('success', 'Estado de la tarea actualizado.');
     }
 }

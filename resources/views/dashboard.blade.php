@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-cyan-400 leading-tight">
-            {{ __('Dashboard') }}
+        <h2 class="neon-text text-xl uppercase tracking-[0.2em] leading-tight">
+            {{ __('De un vistazo') }}
         </h2>
     </x-slot>
 
@@ -102,148 +102,243 @@
                 </script>
             @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {{-- Upcoming Events (Next 3) --}}
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h3 class="neon-text text-xl uppercase tracking-widest">Próximos Eventos</h3>
+            <div class="flex flex-col lg:flex-row gap-8">
+
+                {{-- Left Column: Timeline --}}
+                <div class="lg:w-2/3">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="neon-text text-2xl uppercase tracking-[0.2em] flex items-center gap-3">
+                            <span class="w-1.5 h-6 bg-cyan-500 rounded-full shadow-[0_0_10px_#00f2ff]"></span>
+                            Línea de Tiempo
+                        </h3>
                         <a href="{{ route('tasks.index') }}"
-                            class="text-xs text-white/40 hover:text-cyan-400 transition-colors uppercase font-bold">Ver
-                            Todo</a>
+                            class="text-[10px] text-white/40 hover:text-cyan-400 font-bold uppercase tracking-widest transition-colors">Ver
+                            Todas →</a>
                     </div>
 
-                    @php
-                        $upcomingTasks = auth()->user()->tasks()
-                            ->where('scheduled_at', '>=', now())
-                            ->orderBy('scheduled_at', 'asc')
-                            ->take(3)
-                            ->get();
-                    @endphp
+                    <div class="timeline-container relative">
+                        <div class="absolute left-[7px] top-2 bottom-2 w-px bg-white/10"></div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        @forelse($upcomingTasks as $task)
-                            <div class="glass-card hover:scale-105">
-                                <div class="text-[10px] text-cyan-400 font-bold uppercase mb-2">
-                                    {{ $task->scheduled_at->diffForHumans() }}
-                                </div>
-                                <h4 class="text-white font-bold truncate">{{ $task->title }}</h4>
-                                <div class="mt-4 flex items-center justify-between">
-                                    <div class="text-[10px] text-white/40">
-                                        {{ $task->scheduled_at->format('H:i') }}
-                                    </div>
-                                    @php $forecast = $task->getForecast(); @endphp
-                                    @if($forecast)
-                                        <div class="flex items-center gap-1">
-                                            <img src="https://openweathermap.org/img/wn/{{ $forecast['weather'][0]['icon'] }}.png"
-                                                class="w-6 h-6">
-                                            <span class="text-xs text-cyan-400">{{ round($forecast['main']['temp']) }}°</span>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-span-3 glass-card text-center py-8 text-white/20 italic">
-                                No tienes eventos próximos.
-                            </div>
-                        @endforelse
-                    </div>
+                        @php
+                            $upcomingTasks = Auth::user()->tasks()
+                                ->where('scheduled_at', '>=', now())
+                                ->orderBy('scheduled_at', 'asc')
+                                ->get();
+                        @endphp
 
-                    {{-- Timeline View --}}
-                    <div class="mt-12" x-data="{ view: 'list' }">
-                        <div class="flex items-center justify-between mb-8">
-                            <h3 class="neon-text text-xl uppercase tracking-widest">Línea de Tiempo</h3>
-                            <div class="flex bg-white/5 rounded-full p-1 border border-white/10">
-                                <button @click="view = 'list'"
-                                    :class="view === 'list' ? 'bg-cyan-500 text-white shadow-lg' : 'text-white/40 hover:text-white'"
-                                    class="px-4 py-1 rounded-full text-xs font-bold uppercase transition-all">Lista</button>
-                                <button @click="view = 'timeline'"
-                                    :class="view === 'timeline' ? 'bg-cyan-500 text-white shadow-lg' : 'text-white/40 hover:text-white'"
-                                    class="px-4 py-1 rounded-full text-xs font-bold uppercase transition-all">Timeline</button>
-                            </div>
-                        </div>
-
-                        <div x-show="view === 'list'" class="space-y-4">
-                            @foreach($upcomingTasks as $task)
+                        @forelse ($upcomingTasks as $task)
+                            @php $forecast = $task->getForecast(); @endphp
+                            <div class="relative pl-8 mb-6 group" x-data="{ showNotes: false, saving: false }">
                                 <div
-                                    class="glass-panel p-4 flex items-center justify-between hover:bg-white/10 transition-colors">
-                                    <div class="flex items-center gap-4">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs">
-                                            {{ $task->scheduled_at->format('d') }}
-                                        </div>
-                                        <div>
-                                            <div class="text-white font-bold">{{ $task->title }}</div>
-                                            <div class="text-[10px] text-white/40 uppercase">
-                                                {{ $task->scheduled_at->format('F Y') }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-cyan-400 font-bold">{{ $task->scheduled_at->format('H:i') }}</div>
-                                        <div class="text-[10px] text-white/20">EVENTO</div>
-                                    </div>
+                                    class="absolute left-0 top-2 w-4 h-4 rounded-full border-2 border-cyan-500 bg-[#0a0a12] shadow-[0_0_8px_#00f2ff] z-10 transition-transform group-hover:scale-125">
                                 </div>
-                            @endforeach
-                        </div>
 
-                        <div x-show="view === 'timeline'" class="timeline-container">
-                            @foreach($upcomingTasks as $task)
-                                <div class="relative pl-4">
-                                    <div class="timeline-dot"></div>
-                                    <div class="glass-card mb-4">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <div class="text-xs text-cyan-400 font-bold uppercase mb-1">
-                                                    {{ $task->scheduled_at->format('l, d M Y') }}</div>
-                                                <h4 class="text-lg font-bold text-white">{{ $task->title }}</h4>
-                                                <p class="text-sm text-white/60 mt-2">{{ $task->description }}</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="text-2xl font-bold text-white">
-                                                    {{ $task->scheduled_at->format('H:i') }}</div>
-                                                @if($forecast = $task->getForecast())
-                                                    <div class="flex items-center justify-end gap-2 mt-2">
-                                                        <span
-                                                            class="text-xs text-white/40">{{ $forecast['weather'][0]['description'] }}</span>
+                                <div class="glass-card hover:border-cyan-500/50 transition-all cursor-pointer"
+                                    @click="showNotes = !showNotes">
+                                    <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                                        <div class="flex-grow">
+                                            <div class="flex items-center gap-3 mb-1">
+                                                <span
+                                                    class="text-[10px] text-cyan-400 font-black uppercase tracking-widest">
+                                                    {{ $task->scheduled_at->format('l, d M') }}
+                                                </span>
+                                                @if($task->is_completed)
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[8px] font-black uppercase">Hecho</span>
+                                                @endif
+
+                                                @if($forecast)
+                                                    <div
+                                                        class="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
                                                         <img src="https://openweathermap.org/img/wn/{{ $forecast['weather'][0]['icon'] }}.png"
-                                                            class="w-8 h-8">
+                                                            class="w-4 h-4" alt="weather">
+                                                        <span
+                                                            class="text-[8px] text-white/60 font-bold uppercase">{{ round($forecast['main']['temp']) }}°C</span>
+                                                        @if($task->isWeatherAdverse())
+                                                            <span
+                                                                class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse ml-1"></span>
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>
+                                            <h4
+                                                class="text-xl font-bold text-white transition-colors {{ $task->is_completed ? 'line-through opacity-40' : '' }}">
+                                                {{ $task->title }}
+                                            </h4>
+                                        </div>
+
+                                        <div class="flex items-center gap-6">
+                                            <div class="text-right">
+                                                <div class="text-2xl font-black text-white tracking-widest">
+                                                    {{ $task->scheduled_at->format('H:i') }}
+                                                </div>
+                                                <div class="text-[8px] text-white/20 uppercase font-bold">
+                                                    {{ $task->scheduled_at->diffForHumans() }}
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center gap-2" @click.stop>
+                                                <form action="{{ route('tasks.toggle', $task) }}" method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                        class="p-2 bg-white/5 hover:bg-green-500/20 rounded-xl transition-all {{ $task->is_completed ? 'text-green-500' : 'text-white/20 hover:text-green-400' }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Notes Interaction --}}
+                                    <div x-show="showNotes" x-transition class="mt-4 pt-4 border-t border-white/10"
+                                        @click.stop>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label
+                                                class="text-[8px] text-white/30 uppercase font-black tracking-widest">Notas
+                                                / Apuntes</label>
+                                            <a href="{{ route('tasks.edit', $task) }}"
+                                                class="text-white/20 hover:text-cyan-400 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </a>
+                                        </div>
+                                        <textarea x-ref="noteText"
+                                            class="w-full bg-white/5 border-white/10 rounded-xl text-xs text-white p-3 min-h-[100px] focus:border-cyan-500 focus:ring-0 transition-all"
+                                            placeholder="Escribe algo...">{{ $task->description }}</textarea>
+                                        <div class="flex justify-end mt-2 items-center gap-3">
+                                            <span x-show="saving"
+                                                class="text-[8px] text-cyan-400 animate-pulse font-bold uppercase tracking-widest">Guardando...</span>
+                                            <button @click="
+                                                                saving = true;
+                                                                fetch('{{ route('tasks.update', $task) }}', {
+                                                                    method: 'PATCH',
+                                                                    headers: {
+                                                                        'Content-Type': 'application/json',
+                                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                        'Accept': 'application/json'
+                                                                    },
+                                                                    body: JSON.stringify({ 
+                                                                        description: $refs.noteText.value,
+                                                                        title: '{{ $task->title }}'
+                                                                    })
+                                                                })
+                                                                .then(response => response.json())
+                                                                .then(data => {
+                                                                    saving = false;
+                                                                })
+                                                                .catch(error => {
+                                                                    console.error('Error:', error);
+                                                                    saving = false;
+                                                                })
+                                                            "
+                                                class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest hover:text-cyan-300 transition-colors">
+                                                Guardar Nota
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @empty
+                            <div class="glass-card text-center py-20">
+                                <span class="text-white/10 uppercase font-black tracking-[0.5em] italic">No hay eventos
+                                    próximos</span>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
-                {{-- Side Info / Interactive Section --}}
-                <div class="space-y-6">
-                    <div class="glass-card overflow-hidden group">
-                        <div class="h-32 bg-cyan-500/20 flex items-center justify-center relative overflow-hidden">
-                            <div class="neon-text text-4xl uppercase tracking-[0.2em] relative z-10">LISTS</div>
-                            <div
-                                class="absolute -bottom-10 -right-10 w-40 h-40 bg-cyan-400/20 blur-3xl group-hover:bg-cyan-400/40 transition-all duration-700">
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-white font-bold mb-2">Bienvenido, {{ auth()->user()->name }}</h3>
-                            <p class="text-sm text-white/40">Gestiona tus eventos y mantente al tanto del clima global.
-                            </p>
-
-                            <div class="mt-6 pt-6 border-t border-white/10 space-y-4 font-mono text-xs">
-                                <div class="flex justify-between">
-                                    <span class="text-white/40">TOTAL TAREAS</span>
-                                    <span class="text-cyan-400">{{ auth()->user()->tasks()->count() }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-white/40">PENDIENTES</span>
-                                    <span
-                                        class="text-cyan-400">{{ auth()->user()->tasks()->where('is_completed', false)->count() }}</span>
-                                </div>
-                            </div>
-                        </div>
+                {{-- Right Column: Past Tasks --}}
+                <div class="lg:w-1/3">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-white/60 text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/20" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Tareas Pasadas
+                        </h3>
+                        <a href="{{ route('tasks.index') }}"
+                            class="text-[8px] text-white/20 hover:text-cyan-400 font-black uppercase tracking-widest">Ver
+                            Todas →</a>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        @php
+                            $pastTasks = Auth::user()->tasks()
+                                ->where('scheduled_at', '<', now())
+                                ->orderBy('is_completed', 'asc')
+                                ->orderBy('scheduled_at', 'desc')
+                                ->take(6)
+                                ->get();
+                        @endphp
+
+                        @foreach ($pastTasks as $task)
+                            @php $forecast = $task->getForecast(); @endphp
+                            <div
+                                class="glass-card p-3 relative group overflow-hidden {{ !$task->is_completed ? 'border-red-500/20 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]' : '' }}">
+                                @if(!$task->is_completed)
+                                    <div class="absolute top-0 right-0 w-1 h-full bg-red-500 animate-pulse"></div>
+                                @endif
+
+                                <div class="flex flex-col h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span
+                                            class="text-[7px] font-black uppercase tracking-widest {{ !$task->is_completed ? 'text-red-400' : 'text-white/20' }}">
+                                            {{ $task->scheduled_at->diffForHumans() }}
+                                        </span>
+                                        @if($forecast)
+                                            <div
+                                                class="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                <img src="https://openweathermap.org/img/wn/{{ $forecast['weather'][0]['icon'] }}.png"
+                                                    class="w-3 h-3" alt="w">
+                                                <span
+                                                    class="text-[7px] text-white font-bold">{{ round($forecast['main']['temp']) }}°</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <h5
+                                        class="text-xs font-bold text-white mt-1 mb-2 line-clamp-2 {{ $task->is_completed ? 'opacity-40 line-through' : '' }}">
+                                        {{ $task->title }}
+                                    </h5>
+
+                                    <div class="mt-auto flex items-center justify-between pt-2 border-t border-white/5">
+                                        <div class="text-[8px] font-bold text-white/40">
+                                            {{ $task->scheduled_at->format('d M') }}
+                                        </div>
+                                        <form action="{{ route('tasks.toggle', $task) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all {{ $task->is_completed ? 'text-green-500' : 'text-white/20' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20"
+                                                    fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if($pastTasks->isEmpty())
+                        <div class="border border-dashed border-white/5 rounded-2xl py-10 text-center">
+                            <span class="text-[8px] text-white/10 uppercase font-black tracking-widest">Todo al día</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
