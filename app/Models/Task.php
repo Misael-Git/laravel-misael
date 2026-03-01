@@ -51,11 +51,11 @@ class Task extends Model
             return null;
         }
 
-        return cache()->remember("task_forecast_{$this->id}", 3600, function () {
+        return cache()->remember("task_forecast_{$this->id}", 3600, function () use ($lat, $lng) {
             try {
                 $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get("https://api.openweathermap.org/data/2.5/forecast", [
-                    'lat' => $this->lat,
-                    'lon' => $this->lng,
+                    'lat' => $lat,
+                    'lon' => $lng,
                     'appid' => env('OPENWEATHER_API_KEY'),
                     'units' => 'metric',
                     'lang' => 'es'

@@ -91,17 +91,27 @@
                                 <p class="text-white/40 text-[10px] uppercase font-black tracking-widest mt-1">
                                     @if(request('date'))
                                         Mostrando eventos del {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d \d\e F') }}
+                                    @elseif(request('filter') === 'past')
+                                        Mostrando tareas pasadas
                                     @else
                                         Base de datos de eventos y clima
                                     @endif
                                 </p>
                             </div>
 
-                            @if(request('date'))
-                                <a href="{{ route('tasks.index') }}" class="text-[8px] bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:text-cyan-400 px-3 py-1.5 rounded-lg font-black uppercase tracking-widest transition-all">
-                                    Ver todas las tareas →
-                                </a>
-                            @endif
+                            <div class="flex items-center gap-3">
+                                @if(request('date') || request('filter') === 'past')
+                                    <a href="{{ route('tasks.index') }}" class="text-[8px] bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:text-cyan-400 px-3 py-1.5 rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                                        Ver todas las tareas →
+                                    </a>
+                                @endif
+                                
+                                @if(request('filter') !== 'past')
+                                    <a href="{{ route('tasks.index', ['filter' => 'past']) }}" class="text-[8px] bg-white/5 border border-white/10 hover:border-cyan-500/50 hover:text-cyan-400 px-3 py-1.5 rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap">
+                                        Ver tareas pasadas
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                         @if($isAdverse)
@@ -139,7 +149,7 @@
                                             </span>
                                             
                                             @if($forecast)
-                                                <div class="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
+                                                <div title="Pronóstico para el {{ \Carbon\Carbon::createFromTimestamp($forecast['dt'])->translatedFormat('d M, H:i') }}" class="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 hover:bg-white/10 transition-colors rounded-md border border-white/5 cursor-help">
                                                     <img src="https://openweathermap.org/img/wn/{{ $forecast['weather'][0]['icon'] }}.png" class="w-4 h-4" alt="weather">
                                                     <span class="text-[8px] text-white/60 font-bold">{{ round($forecast['main']['temp']) }}°C</span>
                                                     @if($task->isWeatherAdverse())

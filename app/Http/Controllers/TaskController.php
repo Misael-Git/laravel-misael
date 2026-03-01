@@ -16,9 +16,15 @@ class TaskController extends Controller
 
         if ($request->has('date')) {
             $query->whereDate('scheduled_at', $request->date);
+            $query->orderBy('scheduled_at', 'asc');
+        } elseif ($request->has('filter') && $request->filter === 'past') {
+            $query->where('scheduled_at', '<', now());
+            $query->orderBy('scheduled_at', 'desc'); // Most recent past tasks first
+        } else {
+            $query->orderBy('scheduled_at', 'asc');
         }
 
-        $tasks = $query->orderBy('scheduled_at', 'asc')->paginate(10);
+        $tasks = $query->paginate(10);
         return view('tasks.index', compact('tasks'));
     }
 
