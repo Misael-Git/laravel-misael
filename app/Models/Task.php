@@ -53,6 +53,7 @@ class Task extends Model
 
         return cache()->remember("task_forecast_{$this->id}", 3600, function () use ($lat, $lng) {
             try {
+                // Consultamos el pronóstico de 5 días (datos cada 3 horas)
                 $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get("https://api.openweathermap.org/data/2.5/forecast", [
                     'lat' => $lat,
                     'lon' => $lng,
@@ -65,12 +66,16 @@ class Task extends Model
                     $data = $response->json();
                     $scheduledTime = $this->scheduled_at->timestamp;
 
-                    // Buscar la entrada más cercana en el tiempo
+                    // ALGORITMO: Buscamos en la lista de pronósticos (cada 3h) 
+                    // cuál es el que más se acerca a la hora exacta de nuestra tarea.
                     $closest = null;
                     $minDiff = PHP_INT_MAX;
 
                     foreach ($data['list'] as $forecast) {
+                        // Calculamos la diferencia absoluta en segundos entre el pronóstico y la tarea
                         $diff = abs($forecast['dt'] - $scheduledTime);
+
+                        // Si esta diferencia es menor a la anterior, este es nuestro nuevo pronóstico más cercano
                         if ($diff < $minDiff) {
                             $minDiff = $diff;
                             $closest = $forecast;

@@ -68,13 +68,16 @@
 
                     <script>
                         function initMap() {
+                            // Definimos el centro inicial del mapa usando la ubicación del usuario o Madrid por defecto
                             const defaultLat = {{ auth()->user()->lat ?? 40.4168 }};
                             const defaultLng = {{ auth()->user()->lng ?? -3.7038 }};
 
+                            // Inicializamos el objeto Map de Google en el contenedor #map
                             const map = new google.maps.Map(document.getElementById("map"), {
                                 center: { lat: defaultLat, lng: defaultLng },
                                 zoom: 13,
                                 styles: [
+                                    // Estilos personalizados para un look "Dark Mode" premium
                                     { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
                                     { "elementType": "labels.text.fill", "stylers": [{ "color": "#746855" }] },
                                     { "elementType": "labels.text.stroke", "stylers": [{ "color": "#242f3e" }] },
@@ -92,12 +95,13 @@
                                     { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#515c6d" }] },
                                     { "featureType": "water", "elementType": "labels.text.stroke", "stylers": [{ "color": "#17263c" }] }
                                 ],
-                                disableDefaultUI: true,
+                                disableDefaultUI: true, // Quitamos controles estándar para una UI más limpia
                                 zoomControl: true
                             });
 
                             let marker = null;
 
+                            // Si ya hay coordenadas guardadas (por ejemplo al editar o tras un error de validación), ponemos el marcador
                             @if(old('lat') && old('lng'))
                                 marker = new google.maps.Marker({
                                     position: { lat: {{ old('lat') }}, lng: {{ old('lng') }} },
@@ -105,16 +109,18 @@
                                 });
                             @endif
 
+                            // EVENT LISTENER: Capturamos el click en el mapa para posicionar el marcador y guardar los datos
                             map.addListener("click", (e) => {
                                 const pos = e.latLng;
                                 if (marker) {
-                                    marker.setPosition(pos);
+                                    marker.setPosition(pos); // Movemos el marcador existente
                                 } else {
-                                    marker = new google.maps.Marker({
+                                    marker = new google.maps.Marker({ // Creamos uno nuevo si no existe
                                         position: pos,
                                         map: map
                                     });
                                 }
+                                // Actualizamos los inputs ocultos del formulario con la lat/lng obtenida del evento
                                 document.getElementById("lat").value = pos.lat();
                                 document.getElementById("lng").value = pos.lng();
                             });

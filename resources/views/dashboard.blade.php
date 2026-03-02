@@ -218,28 +218,28 @@
                                             <span x-show="saving"
                                                 class="text-[8px] text-cyan-400 animate-pulse font-bold uppercase tracking-widest">Guardando...</span>
                                             <button @click="
-                                                                saving = true;
-                                                                fetch('{{ route('tasks.update', $task) }}', {
-                                                                    method: 'PATCH',
-                                                                    headers: {
-                                                                        'Content-Type': 'application/json',
-                                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                                        'Accept': 'application/json'
-                                                                    },
-                                                                    body: JSON.stringify({ 
-                                                                        description: $refs.noteText.value,
-                                                                        title: '{{ $task->title }}'
+                                                                    saving = true;
+                                                                    fetch('{{ route('tasks.update', $task) }}', {
+                                                                        method: 'PATCH',
+                                                                        headers: {
+                                                                            'Content-Type': 'application/json',
+                                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                            'Accept': 'application/json'
+                                                                        },
+                                                                        body: JSON.stringify({ 
+                                                                            description: $refs.noteText.value,
+                                                                            title: '{{ $task->title }}'
+                                                                        })
                                                                     })
-                                                                })
-                                                                .then(response => response.json())
-                                                                .then(data => {
-                                                                    saving = false;
-                                                                })
-                                                                .catch(error => {
-                                                                    console.error('Error:', error);
-                                                                    saving = false;
-                                                                })
-                                                            "
+                                                                    .then(response => response.json())
+                                                                    .then(data => {
+                                                                        saving = false;
+                                                                    })
+                                                                    .catch(error => {
+                                                                        console.error('Error:', error);
+                                                                        saving = false;
+                                                                    })
+                                                                "
                                                 class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest hover:text-cyan-300 transition-colors">
                                                 Guardar Nota
                                             </button>
